@@ -1,0 +1,15 @@
+{
+    "repos" : [
+        {
+            "domain" : "{{ repo_name }}",
+            "keys" : ["key1"]
+        }
+    ],
+    "keys" : [
+        {
+            "type" : "file",
+            "file_name" : "/etc/cvmfs/keys/{{ repo_name }}.gw",
+            "repo_subpath" : "/"
+        }
+    ]
+}

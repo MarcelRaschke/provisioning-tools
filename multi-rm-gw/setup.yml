@@ -1,0 +1,90 @@
+---
+- name: Set up the repository gateway
+  hosts: cvmfs_gw
+  remote_user: root
+  become: yes
+  tags: gateway
+  tasks:
+    - name: Disable SELinux (it only causes pain)
+      selinux: state=disabled
+
+    - name: Start Firewalld
+      service: name=firewalld enabled=yes state=started
+
+    - name: Open firewall port tcp:80
+      firewalld: service=http permanent=true state=enabled
+
+    - name: Open firewall port tcp:4929
+      firewalld: port=4929/tcp permanent=true state=enabled
+
+    - name: Reload Firewalld
+      service: name=firewalld enabled=yes state=reloaded
+
+    - name: Install any prerequisites
+      yum: name=httpd state=present
+
+    - name: Start Apache
+      service: name=httpd enabled=yes state=started
+
+    - name: Install the CernVM-FS Yum repository
+      yum:
+        name: https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm
+        state: present
+
+    - name: Install the CVMFS packages and dependencies
+      yum: name="cvmfs,cvmfs-server,cvmfs-gateway"
+
+    - name: Create the test repository
+      command: cvmfs_server mkfs -o root {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
+
+    - name: Add a gateway key to the repository
+      copy: content="plain_text key1 secret\n" dest=/etc/cvmfs/keys/{{ repo_name }}.gw mode=400
+
+    - name: Write /etc/cvmfs/gateway/repo.json
+      template: src=repo.json dest=/etc/cvmfs/gateway/repo.json
+
+    - name: Make local directory for the repository keys
+      file: path=/tmp/keys state=directory
+
+    - name: Download the keys of the newly created repo
+      fetch: src="/etc/cvmfs/keys/{{ repo_name }}.{{ item }}" dest=/tmp/keys/ flat=yes
+      with_items:
+        - pub
+        - crt
+        - gw
+
+    - name: Start the CVMFS repository services application
+      service: name=cvmfs-gateway enabled=yes state=started
+
+# - name: Set up release manager VMs
+#   roles:
+#     - benchmark
+#   hosts: cvmfs_rm
+#   remote_user: root
+#   become: yes
+#   tags: release_manager
+#   tasks:
+#     - name: Install prerequisites
+#       yum: name="yum-utils,libselinux-python,git,httpd,tree" update_cache=yes
+#     - name: Start Apache
+#       service: name=httpd enabled=yes state=started
+#     - name: Disable SELinux (it only causes pain)
+#       selinux: state=disabled
+#     - name: Install the CVMFS client and server packages
+#       yum: name="{{ cvmfs_client_package }}, {{ cvmfs_server_package }}"
+#     - name: Create directories for bind mounting into the container
+#       file:
+#         path: "~/scratch/{{ item }}"
+#         state: directory
+#       with_items:
+#         - config
+#         - data
+#         - spool
+#     - name: Copy test repository keys
+#       copy: src=/tmp/keys/ dest=~/scratch/config/keys
+#     - name: Copy the repo_config.json file
+#       copy: src=repo_config.json dest=~/scratch/config/
+#     - name: Create CVMFS repository
+#       command: cvmfs_server mkfs -o {{ repo_owner }} -w {{ stratum0 }} -u {{ upstream }} -k {{ key_dir }} {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
+#     - name: Copy benchmark script
+#       template: src=run_benchmark.sh dest=~/scratch/data/ mode=0744
