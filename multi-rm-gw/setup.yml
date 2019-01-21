@@ -34,11 +34,14 @@
     - name: Install the CVMFS packages and dependencies
       yum: name="cvmfs,cvmfs-server,cvmfs-gateway"
 
+    - name: Write S3 credential file
+      template: src=s3.conf dest=/etc/cvmfs/{{ repo_name }}-s3.conf
+
     - name: Create the test repository
-      command: cvmfs_server mkfs -o root {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
+      command: cvmfs_server mkfs -o root -s /etc/cvmfs/{{ repo_name}}-s3.conf -w http://{{ s3_bucket_name }}.s3.cern.ch/cvmfs {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
 
     - name: Add a gateway key to the repository
-      copy: content="plain_text key1 secret\n" dest=/etc/cvmfs/keys/{{ repo_name }}.gw mode=400
+      copy: content="plain_text {{ gw_key_id}} {{ gw_key_secret }}\n" dest=/etc/cvmfs/keys/{{ repo_name }}.gw mode=400
 
     - name: Write /etc/cvmfs/gateway/repo.json
       template: src=repo.json dest=/etc/cvmfs/gateway/repo.json
@@ -83,4 +86,4 @@
       copy: src=/tmp/keys/ dest=/tmp/keys
 
     - name: Create CVMFS repository
-      command: cvmfs_server mkfs -o root -w {{ stratum0 }} -u {{ upstream }} -k /tmp/keys {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
+      command: cvmfs_server mkfs -o root -w http://{{ s3_bucket_name }}.s3.cern.ch/cvmfs -u {{ rm_upstream }} -k /tmp/keys {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
