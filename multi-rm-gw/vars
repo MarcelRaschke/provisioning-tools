@@ -1,0 +1,7 @@
+repo_name =
+s3_bucket_name =
+s3_access_key =
+s3_secret_key =
+gw_key_id =
+gw_key_secret =
+rm_upstream =

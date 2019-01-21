@@ -1,0 +1,7 @@
+[cvmfs_gw]
+SFT-cvmfs-gateway-test-01.cern.ch
+
+[cvmfs_rm]
+SFT-cvmfs-release-manager-test-01
+SFT-cvmfs-release-manager-test-02
+SFT-cvmfs-release-manager-test-03
