@@ -1,0 +1,30 @@
+# Options common to multiple components (worker, server, etc.)
+keydir = "/etc/cvmfs/keys" # Default key dir
+
+# Job server configuration is used by conveyor {submit, consumer, server}
+[server]
+host = "{{ conveyor_server_url }}"
+port = 8080
+
+# Queue configuration is used by conveyor server
+[queue]
+username = "{{ rabbitmq_worker_user }}"
+password = "{{ rabbitmq_worker_pass }}"
+host = "{{ conveyor_server_url }}"
+port = 5672
+vhost = "/cvmfs"
+
+# Job server backend configuration is only used by conveyor server
+[db]
+type = "mysql"
+database = "{{ db_name }}"
+username = "{{ db_user }}"
+password = "{{ db_pass }}"
+host = "localhost"
+post = 3306
+
+# Worker configuration
+[worker]
+# name = defaults to hostname
+jobretries = 3
+tempdir = "/tmp/conveyor-worker"

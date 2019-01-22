@@ -10,3 +10,8 @@ rabbitmq_admin_user:
 rabbitmq_admin_pass:
 rabbitmq_worker_user:
 rabbitmq_worker_pass:
+
+conveyor_server_url:
+db_user:
+db_pass:
+db_name:
