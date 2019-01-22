@@ -5,3 +5,8 @@ s3_secret_key:
 gw_key_id:
 gw_key_secret:
 rm_upstream:
+
+rabbitmq_admin_user:
+rabbitmq_admin_pass:
+rabbitmq_worker_user:
+rabbitmq_worker_pass:

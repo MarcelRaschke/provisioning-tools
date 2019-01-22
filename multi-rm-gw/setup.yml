@@ -11,17 +11,26 @@
     - name: Start Firewalld
       service: name=firewalld enabled=yes state=started
 
-    - name: Open firewall port tcp:80
+    - name: Open port 80/tcp (HTTPD)
       firewalld: service=http permanent=true state=enabled
 
-    - name: Open firewall port tcp:4929
+    - name: Open port 3306/tcp (MariaDB)
+      firewalld: port=3306/tcp permanent=true state=enabled
+
+    - name: Open port 4929/tcp (CVMFS Gateway)
       firewalld: port=4929/tcp permanent=true state=enabled
+
+    - name: Open port 5672/tcp (RabbitMQ)
+      firewalld: port=5672/tcp permanent=true state=enabled
+
+    - name: Open port 15672/tcp (RabbitMQ admin console)
+      firewalld: port=15672/tcp permanent=true state=enabled
 
     - name: Reload Firewalld
       service: name=firewalld enabled=yes state=reloaded
 
     - name: Install any prerequisites
-      yum: name=httpd state=present
+      yum: name="httpd,mariadb-server,mariadb,python2-PyMySQL,rabbitmq-server" state=present
 
     - name: Start Apache
       service: name=httpd enabled=yes state=started
@@ -58,6 +67,37 @@
 
     - name: Start the CVMFS repository services application
       service: name=cvmfs-gateway enabled=yes state=started
+
+    - name: Start RabbitMQ server
+      systemd: name=rabbitmq-server enabled=yes state=started
+
+    - name: Download RabbitMQ configuration script from the Conveyor repo
+      get_url:
+        url: https://raw.githubusercontent.com/cvmfs/conveyor/master/setup/configure_rabbitmq.sh
+        dest: /tmp/configure_rabbitmq.sh
+        mode: 0755
+
+    - name: Configure RabbitMQ
+      command: /tmp/configure_rabbitmq.sh {{ rabbitmq_admin_user }} {{ rabbitmq_admin_pass }} {{ rabbitmq_worker_user }} {{ rabbitmq_worker_pass }}
+
+    - name: Download ulimit config file for RabbitMQ from the Conveyor repo
+      get_url:
+        url: https://raw.githubusercontent.com/cvmfs/conveyor/master/setup/20-nofile.conf
+        dest: /etc/security/limits.d/20-rabbitmq-nofile.conf
+        mode: 0644
+
+    - name: Create directory /etc/systemd/system/rabbitmq-server.service.d/
+      file: path=/etc/systemd/system/rabbitmq-server.service.d state=directory
+
+    - name: Increase max number of open file descriptors (RabbitMQ setting)
+      get_url:
+        url: https://raw.githubusercontent.com/cvmfs/conveyor/master/setup/rabbitmq-limits.conf
+        dest: /etc/systemd/system/rabbitmq-server.service.d/limits.conf
+        mode: 0644
+
+    - name: Restart RabbitMQ server
+      systemd: name=rabbitmq-server enabled=yes daemon_reload=yes state=restarted
+
 
 - name: Set up release managers
   hosts: cvmfs_rm
