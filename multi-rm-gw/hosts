@@ -2,6 +2,6 @@
 SFT-cvmfs-gateway-test-01.cern.ch
 
 [cvmfs_rm]
-SFT-cvmfs-release-manager-test-01
-SFT-cvmfs-release-manager-test-02
-SFT-cvmfs-release-manager-test-03
+SFT-cvmfs-release-manager-test-01.cern.ch
+SFT-cvmfs-release-manager-test-02.cern.ch
+SFT-cvmfs-release-manager-test-03.cern.ch
