@@ -86,4 +86,4 @@
       copy: src=/tmp/keys/ dest=/tmp/keys
 
     - name: Create CVMFS repository
-      command: cvmfs_server mkfs -o root -w http://{{ s3_bucket_name }}.s3.cern.ch/cvmfs -u {{ rm_upstream }} -k /tmp/keys {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
+      command: cvmfs_server mkfs -o root -w http://{{ s3_bucket_name }}.s3.cern.ch/cvmfs/{{ repo_name }} -u {{ rm_upstream }} -k /tmp/keys {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
