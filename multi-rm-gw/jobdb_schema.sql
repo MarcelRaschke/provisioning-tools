@@ -1,3 +1,4 @@
+CREATE DATABASE {{ db_name }};
 USE {{ db_name }};
 
 CREATE TABLE IF NOT EXISTS Jobs (
@@ -16,3 +17,7 @@ CREATE TABLE IF NOT EXISTS Jobs (
     Successful boolean NOT NULL,
     ErrorMessage varchar(65535) NOT NULL
 );
+
+CREATE USER '{{ db_user}}'@'localhost' IDENTIFIED BY '{{ db_pass }}';
+GRANT ALL PRIVILEGES ON *.* TO '{{ db_user }}'@'localhost';
+FLUSH PRIVILEGES;

@@ -14,9 +14,6 @@
     - name: Open port 80/tcp (HTTPD)
       firewalld: service=http permanent=true state=enabled
 
-    - name: Open port 3306/tcp (MariaDB)
-      firewalld: port=3306/tcp permanent=true state=enabled
-
     - name: Open port 4929/tcp (CVMFS Gateway)
       firewalld: port=4929/tcp permanent=true state=enabled
 
@@ -98,6 +95,24 @@
     - name: Restart RabbitMQ server
       systemd: name=rabbitmq-server enabled=yes daemon_reload=yes state=restarted
 
+    - name: Start MariaDB
+      systemd: name=mariadb enabled=yes state=restarted
+
+    - name: Copy SQL template file
+      template: src=jobdb_schema.sql dest=/tmp/jobdb_schema.sql
+
+    - name: Create SQL schema for Conveyor
+      script: create_schema.sh creates=/var/lib/mysql/{{ db_name }}
+
+    - name: Install Conveyor
+      yum: name={{ conveyor_pkg_url }}
+
+    - name: Write Conveyor server configuration
+      template: src=conveyor_server_config.toml dest=/etc/cvmfs/conveyor/config.toml
+
+    - name: Start Conveyor server
+      systemd: name=conveyor-server enabled=yes state=restarted
+
 
 - name: Set up release managers
   hosts: cvmfs_rm
@@ -127,3 +142,12 @@
 
     - name: Create CVMFS repository
       command: cvmfs_server mkfs -o root -w http://{{ s3_bucket_name }}.s3.cern.ch/cvmfs/{{ repo_name }} -u {{ rm_upstream }} -k /tmp/keys {{ repo_name }} creates=/etc/cvmfs/repositories.d/{{ repo_name }}
+
+    - name: Install Conveyor
+      yum: name={{ conveyor_pkg_url }}
+
+    - name: Write Conveyor configuration
+      template: src=conveyor_worker_config.toml dest=/etc/cvmfs/conveyor/config.toml
+
+    - name: Start Conveyor worker
+      systemd: name=conveyor-worker enabled=yes state=restarted

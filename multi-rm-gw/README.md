@@ -27,7 +27,7 @@ Additionally, the playbook uses the following variables:
 5. `gw_key_id` - public id of the gateway API key shared between gateway and release managers
 6. `gw_key_secret` - secret of the gateway API key
 7. `rm_upstream` - CernVM-FS repository upstream configuration string (used on the release managers, points to the gateway)
-8. `conveyor_build_url` - the location of the Conveyor build to be installed
+8. `conveyor_pkg_url` - the location of the Conveyor package to be installed
 9. `rabbitmq_admin_user` - RabbitMQ administrator username
 10. `rabbitmq_admin_pass` - RabbitMQ administrator password
 11. `rabbitmq_worker_user` - RabbitMQ worker username

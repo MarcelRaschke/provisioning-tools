@@ -6,6 +6,8 @@ gw_key_id:
 gw_key_secret:
 rm_upstream:
 
+conveyor_pkg_url:
+
 rabbitmq_admin_user:
 rabbitmq_admin_pass:
 rabbitmq_worker_user:
