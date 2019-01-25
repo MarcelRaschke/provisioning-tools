@@ -23,6 +23,9 @@
     - name: Open port 15672/tcp (RabbitMQ admin console)
       firewalld: port=15672/tcp permanent=true state=enabled
 
+    - name: Open port 8080/tcp (Conveyor server)
+      firewalld: port=8080/tcp permanent=true state=enabled
+
     - name: Reload Firewalld
       service: name=firewalld enabled=yes state=reloaded
 
